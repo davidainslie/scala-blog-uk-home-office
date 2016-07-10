@@ -1,1 +1,213 @@
-Hello, world
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Scala Blog - Scala at UK Home Office by davidainslie</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Scala Blog - Scala at UK Home Office</h1>
+      <h2 class="project-tagline">Scala just might be your best programming investment</h2>
+      <a href="https://github.com/davidainslie/scala-blog-uk-home-office" class="btn">View on GitHub</a>
+      <a href="https://github.com/davidainslie/scala-blog-uk-home-office/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/davidainslie/scala-blog-uk-home-office/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <p>Welcome to the second of a series of blog posts about Scala.</p>
+
+<p>As discussed in the first post <a href="https://davidainslie.github.io/scala-blog-introduction/">An Introduction</a> <a href="http://www.scala-lang.org/"><strong>Scala</strong></a> just might be your best programming investment.</p>
+
+<p>Scala took a while to get going, but now it is being rapidly adopted. The UK Home Office, and indeed many other Government departments, are using Scala now, and more and more projects are choosing to go with Scala. Even banks, and especially investment banks that have millions and millions invested in technologies (mainly C, C++ and Java) have got onto the Scala bandwagon - this is very significant, because they will only adopt technology that they see as the future.</p>
+
+<p>How are we using it at the UK Home Office?</p>
+
+<p>Within the Scala community, some of the open source libraries we use are:</p>
+
+<ul>
+<li><a href="https://playframework.com/">Play</a></li>
+<li>
+<a href="http://spray.io/">Spray</a>, for building RESTful microservices, which is being merged into the powerful Akka and renamed as Akka HTTP.</li>
+<li>
+<a href="http://akka.io/">Akka</a>, to build highly concurrent, distributed, and resilient message driven applications. Akka is built around the <a href="https://en.wikipedia.org/wiki/Actor_model">Actor methodology</a> and provides many libraries for the likes of clustering, persistence, reactive streams and RESTful services. You can even write automated tests for anything provided such as a cluster.</li>
+<li>
+<a href="http://kafka.apache.org/">Kafka</a>, designed to allow a single cluster to serve as the central data backbone for a large organization. It can be elastically and transparently expanded without downtime.</li>
+</ul>
+
+<h2>
+<a id="scala-at-the-home-office" class="anchor" href="#scala-at-the-home-office" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Scala at The Home Office</h2>
+
+<p>Scala is already used on many projects in the Home Office, and we continue creating <a href="https://github.com/UKHomeOffice">open source libraries</a> - we'll cover quite a few from the Home Office Registered Traveller Programme (RTP - where libraries are named rtp-library-name).</p>
+
+<p>Scala is also used within many over UK government departments.</p>
+
+<p>Within the Home Office we use: SBT; Play; Akka; Spray (merged into Akka-HTTP); Specs2 and Scalatest; Casbah, Salat, Reactivemongo to interact with Mongodb.</p>
+
+<p>The <strong>Registered Traveller Caseworker</strong> system accepts applications from a customer facing system for fast tracking through UK borders. Applications (Cases) are held in Mongodb and go through a workflow process, managed with a Play frontend.</p>
+
+<p>The <strong>Registered to Apply for Global Entry</strong> system is similar, but for fast tracking UK citizens through USA borders. This shows a good example of using Akka Clustering - very powerful and yet easy. We have load-balanced boxes that talk to the USA system via SOAP services. Our system constantly asks the USA system questions about customers either registering or already registered. Because each box does the same thing, we don't want the same question asked from both boxes, as we may get race conditions. By using an Akka Singleton Cluster, actors attempt to start up on all boxes e.g. actor of type A wants to start up on Nodes 1, 2 and 3. However, only one box will have actor A running. The <strong>actor systems</strong> on the boxes, constantly communicate - if actor A goes down on Node 1, or if Node 1 itself goes down, Akka will start up the same actor on one of the available boxes. If we had a Play application for monitoring these boxes, it would be easy, as it would simply join the Akka Cluster.</p>
+
+<p>The following is just a few of our Home Office Registered Traveller open source Scala libraries.</p>
+
+<h3>
+<a id="io-functionality-rtp-io-lib" class="anchor" href="#io-functionality-rtp-io-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>IO functionality (rtp-io-lib)</strong>
+</h3>
+
+<p><a href="https://github.com/UKHomeOffice/rtp-io-lib">rtp-io-lib</a> is a general purpose library focused around IO. Many of our projects in the Home Office use JSON to communicate with other systems. Even though JSON is schemaless, a <a href="http://json-schema.org/">JSON Schema</a> can be used, as we do. We use JSON schemas as contracts between systems, and they are used to validate JSON so adding minimal security. By using this approach it is easier to develop and test systems in isolation, knowing that upon integration testing, things should just work! </p>
+
+<p>E.g. to validate JSON against a schema:</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">val</span> <span class="pl-en">jsonSchema</span> <span class="pl-k">=</span> <span class="pl-en">JsonSchema</span>(&lt;<span class="pl-ent">your</span> schema from a JSON file&gt;)
+<span class="pl-k">val</span> <span class="pl-en">json</span> <span class="pl-k">=</span> <span class="pl-en">JValue</span>(&lt;<span class="pl-ent">your</span> JSON&gt;)
+
+jsonSchema validate json map processJson badMap processError</pre></div>
+
+<p>Interesting line (<strong>jsonSchema validate json map...</strong>), especially if you don't know Scala and/or functional programming.</p>
+
+<p>Because Scala can easily produces DSLs (Domain Specific Languages) both internal and external, we can write and read our code somewhat fairly close to English. So how do we understand that line?</p>
+
+<p>Well <strong>map</strong> (as mentioned) is "something" that given input, in this case the result of <strong>jsonSchema validate json</strong>, will produce output. It produces output by applying a function, in this case <strong>processJson</strong> to the given input.</p>
+
+<p>And <strong>badMap</strong> does just the same as <strong>map</strong>, but as the name suggests, its input is something dodgy!</p>
+
+<p>Well <strong>jsonSchema validate json</strong>, validates the <strong>json</strong> against the <strong>jsonSchema</strong>. Now either validation passes or fails. If it passes, that <em>good</em> JSON will be given to <strong>map</strong> to apply its function <strong>processJson</strong>. If the validation fails, the <em>bad</em> errors will be given to <strong>badMap</strong> to apply its function <strong>processError</strong>. What this one "DSL" line means, is that functionality is split into reusable, testable, easier to manage and reason about functions.</p>
+
+<p>This library provides so much more:</p>
+
+<ul>
+<li>Transform JSON e.g. renaming properties; altering values including changing their types; restructuring the JSON.</li>
+<li>DSL for condition logic.</li>
+<li>Configuration "add-ons" for the powerful <a href="https://github.com/typesafehub/config">Scala configuration library</a>.</li>
+<li>Easily read resources into something you need, and easily add to this functionality.</li>
+</ul>
+
+<h3>
+<a id="akka-functionality-rtp-akka-lib" class="anchor" href="#akka-functionality-rtp-akka-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Akka functionality (rtp-akka-lib)</strong>
+</h3>
+
+<p><a href="https://github.com/UKHomeOffice/rtp-akka-lib">rtp-akka-lib</a> provides some extras for working with Akka and Spray (though Spray is being merged into Akka). <a href="http://akka.io/">Akka</a> is too big to describe what it really is, but it's all about distributed, concurrent, fault-tolerant, resilient, but amazingly easy to test systems. <a href="http://spray.io/">Spray</a> is also big, but centres around easily creating RESTful services. At the Home Office we use Spray for microservices.</p>
+
+<p>This library provides:</p>
+
+<ul>
+<li>Easy composition of routings i.e. RESTful endpoints.</li>
+<li>Extra marshalling for converting external requests/responses to/from domain code.</li>
+<li>Scheduling.</li>
+<li>Clustering, specifically singleton clustering i.e. some functionality only runs on one box.</li>
+</ul>
+
+<h3>
+<a id="interacting-with-mongodb-the-nosql-database-rtp-mongo-lib" class="anchor" href="#interacting-with-mongodb-the-nosql-database-rtp-mongo-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Interacting with Mongodb the NoSQL database (rtp-mongo-lib)</strong>
+</h3>
+
+<p><a href="https://github.com/UKHomeOffice/rtp-mongo-lib">rtp-mongo-lib</a> to seamlessly work with Mongo drivers - currently Casbah (with or without Salat) and ReactiveMongo.</p>
+
+<p>Casbah is a Scala library that wraps the official Java driver for Mongodb (a library to interact with Mongodb). Salat sits on top of Casbah to provide, well, think of it as the equivalent of an ORM tool i.e. Object to Relational Mapping. Of course Mongodb is not a Relational database, but the idea is the same - the tool abstracts the underlying data structure of the database to a programmer's Object world. Note that Casbah synchronously interacts with the database. Mmmm! Not reactive. However, there is a newer asynchronous driver that has come out to maybe replace Casbah.</p>
+
+<p>As for Reactivemongo. It is an asynchronous Mongodb driver.</p>
+
+<p>This library provides:</p>
+
+<ul>
+<li>Easily create a Repository (representation of a Mongodb Collection, much like a Relational Table), injecting the "configuration" such as location and credentials of your database.</li>
+<li>Embed a Mongodb server with a specification so that each test can interact with Mongo but still be completely independent i.e. no test interference.</li>
+</ul>
+
+<h3>
+<a id="publishsubscribe-to-rabbitmq-messaging-system-rtp-rabbit-lib" class="anchor" href="#publishsubscribe-to-rabbitmq-messaging-system-rtp-rabbit-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Publish/Subscribe to RabbitMQ messaging system (rtp-rabbit-lib)</strong>
+</h3>
+
+<p><a href="https://github.com/UKHomeOffice/rtp-rabbit-lib">rtp-rabbit-lib</a> allows for easy interaction with <a href="https://www.rabbitmq.com/">RabbitMQ</a>, the messaging system written in <a href="https://www.erlang.org/">Erlang</a>. Originally, our RTP frontend and backend systems, were separated by RabbitMQ - frontend public facing systems would publish applications to RabbitMQ queues from which backend systems would subscribe. Note that we decided that the library should only work with JSON (functionality could be added for other data formats).</p>
+
+<p>This library provides:</p>
+
+<ul>
+<li>Automatic subscription, where business functionality only has to implement a method that accepts JSON that was published onto a queue.</li>
+<li>Publication and subscription of JSON is automatically validated against a provided JSON schema.</li>
+<li>Messages are only removed from queues, when your business logic is done and happy.</li>
+<li>Error messages can be published to error queues - we coded an Error Policy.</li>
+<li>There is a default Retry Strategy, which can be extended.</li>
+<li>Easy testing. Even though a running instance of RabbitMQ is required (we do not have an embedded version as RabbitMQ is written in Erlang) every test creates its own unique, temporary queues - creation and teardown is done for you.</li>
+</ul>
+
+<p>An example of writing a test is (don't worry about the details, just note that we are running a full blown integration test as if it were a simple, concise unit test):</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Consumer<span class="pl-pds">"</span></span> should {
+  <span class="pl-s"><span class="pl-pds">"</span>consume valid JSON message (for a simple test we do not have a JSON schema to validate against)<span class="pl-pds">"</span></span> in {
+    <span class="pl-c">// Result will be set at some point but don't know when as publish/subscribe is asynchronous.</span>
+    <span class="pl-k">val</span> <span class="pl-en">result</span> <span class="pl-k">=</span> <span class="pl-en">Promise</span>[<span class="pl-en">JValue</span>]()
+
+    <span class="pl-c">// Create a Publisher that is also a Consumer where WithRabbit will connect to a RabbitMQ instance and create/teardown queues.</span>
+    <span class="pl-k">val</span> <span class="pl-en">rabbit</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Publisher</span> <span class="pl-k">with</span> <span class="pl-e">NoJsonValidator</span> <span class="pl-k">with</span> <span class="pl-e">WithQueue.Consumer</span> <span class="pl-k">with</span> <span class="pl-e">WithRabbit</span> {
+      <span class="pl-c">// This method is run, when JSON is consumed from a queue (JSON is automatically validated).</span>
+      <span class="pl-k">def</span> <span class="pl-en">json</span>(<span class="pl-v">json</span>: <span class="pl-en">JValue</span>) <span class="pl-k">=</span> result success json
+    }
+
+    <span class="pl-c">// Publish JSON to RabbitMQ</span>
+    rabbit.publish(<span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
+
+    <span class="pl-c">// At some point in the future, the published JSON will be consumed and here we assert that result.</span>
+    result.future must beLike[<span class="pl-en">JValue</span>] {
+      <span class="pl-k">case</span> j <span class="pl-k">=&gt;</span> j \ <span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> mustEqual <span class="pl-en">JString</span>(<span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
+    }.await
+  }
+}</pre></div>
+
+<h3>
+<a id="publishsubscribe-to-amazon-sqs-messaging-system-rtp-amazon-sqs-lib" class="anchor" href="#publishsubscribe-to-amazon-sqs-messaging-system-rtp-amazon-sqs-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Publish/Subscribe to Amazon SQS messaging system (rtp-amazon-sqs-lib)</strong>
+</h3>
+
+<p><a href="https://github.com/UKHomeOffice/rtp-amazon-sqs-lib">rtp-amazon-sqs-lib</a> allows for easy integration with Amazon's SQS messaging system, with the help of <a href="https://github.com/adamw/elasticmq">ElasticMQ</a>, an implementation of Amazon SQS. RTP now uses Amazon SQS in favour of RabbitMQ, having moved to AWS. The idea of this library, is much the same as the one discussed above (for RabbitMQ), except that it is a tad more generic, and testing is even easier with an actual embedded Amazon SQS, thanks to ElasticMQ and some custom wrappers.</p>
+
+<p>This library provides:</p>
+
+<ul>
+<li>Automatic subscription of any kind of messages.</li>
+<li>Processing of messages is done via your custom messaging protocol built on top of Akka (unlike the RabbitMQ library we have, where you implement a contract based on JSON).</li>
+<li>Publication and subscription of JSON can be easily validated against a JSON schema.</li>
+<li>Messages can be filtered by chaining filter functions. A message can be altered, replaced, or even ignored.</li>
+<li>Message listeners can be registered.</li>
+<li>Messages are only removed from queues, when your business logic is done and happy.</li>
+<li>Error messages can be published to error queues.</li>
+<li>Easy testing. Everything is embedded and tests do not interfere with other.</li>
+<li>Integration tests are written as easily as unit tests and mocking is rarely required, making your tests more viable and code design better.</li>
+</ul>
+
+<p>An example of writing a test is (don't worry about the details, just note that we are running a full blown integration test as if it were a simple, concise unit test), where a message is published to Amazon SQS queue and subscription processes the message:</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Subscribing to a text message<span class="pl-pds">"</span></span> should {
+  <span class="pl-s"><span class="pl-pds">"</span>fire a message of <span class="pl-pds">"</span></span><span class="pl-en">Processed</span><span class="pl-s"><span class="pl-pds">"</span>, once processing is complete<span class="pl-pds">"</span></span> in <span class="pl-k">new</span> <span class="pl-en">Context</span> {
+    system actorOf <span class="pl-en">Props</span> {
+      <span class="pl-k">new</span> <span class="pl-en">SubscriberActor</span>(<span class="pl-k">new</span> <span class="pl-en">Subscriber</span>(queue)) {
+        <span class="pl-k">def</span> <span class="pl-en">receive</span><span class="pl-k">:</span> <span class="pl-en">Receive</span> <span class="pl-k">=</span> {
+          <span class="pl-k">case</span> <span class="pl-v">m</span>: <span class="pl-en">Message</span> <span class="pl-k">=&gt;</span> sender() <span class="pl-k">!</span> <span class="pl-en">Processed</span>(m)
+        }
+      }
+    }
+
+    <span class="pl-k">val</span> <span class="pl-en">message</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>blah<span class="pl-pds">"</span></span>
+
+    <span class="pl-k">new</span> <span class="pl-en">Publisher</span>(queue) publish message
+
+    eventuallyExpectMsg[<span class="pl-en">Processed</span>] {
+      <span class="pl-k">case</span> <span class="pl-en">Processed</span>(m) <span class="pl-k">=&gt;</span> m.content <span class="pl-k">==</span> message
+    }
+  }
+}</pre></div>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/davidainslie/scala-blog-uk-home-office">Scala Blog - Scala at UK Home Office</a> is maintained by <a href="https://github.com/davidainslie">davidainslie</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
