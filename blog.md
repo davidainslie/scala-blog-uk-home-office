@@ -1,6 +1,6 @@
 Welcome to the second of a series of blog posts about Scala.
 
-As discussed in the first post [An Introduction](https://davidainslie.github.io/scala-blog-introduction/) [**Scala**](http://www.scala-lang.org/) just might be your best programming investment.
+As discussed in the first post [An Introduction](https://davidainslie.github.io/scala-blog-introduction/), [Scala](http://www.scala-lang.org/) just might be your best programming investment.
 
 Scala took a while to get going, but now it is being rapidly adopted. The UK Home Office, and indeed many other Government departments, are using Scala now, and more and more projects are choosing to go with Scala. Even banks, and especially investment banks that have millions and millions invested in technologies (mainly C, C++ and Java) have got onto the Scala bandwagon - this is very significant, because they will only adopt technology that they see as the future.
 
