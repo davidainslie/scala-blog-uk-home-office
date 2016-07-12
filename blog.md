@@ -1,4 +1,4 @@
-Welcome to the second of a series of blog posts about Scala.
+Welcome to the third of a series of blog posts about Scala.
 
 As discussed in the first post [An Introduction](https://davidainslie.github.io/scala-blog-introduction/), [Scala](http://www.scala-lang.org/) just might be your best programming investment.
 
