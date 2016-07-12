@@ -1,4 +1,4 @@
-name := "scala-blog"
+name := "scala-blog-uk-home-office"
 
 version := "1.0.0"
 
