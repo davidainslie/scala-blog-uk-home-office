@@ -12,7 +12,6 @@ Within the Scala community, some of the open source libraries we use are:
 - [Akka](http://akka.io/), to build highly concurrent, distributed, and resilient message driven applications. Akka is built around the [Actor methodology](https://en.wikipedia.org/wiki/Actor_model) and provides many libraries for the likes of clustering, persistence, reactive streams and RESTful services. You can even write automated tests for anything provided such as a cluster.
 - [Kafka](http://kafka.apache.org/), designed to allow a single cluster to serve as the central data backbone for a large organization. It can be elastically and transparently expanded without downtime.
 
-
 # Scala at The Home Office
 Scala is already used on many projects in the Home Office, and we continue creating [open source libraries](https://github.com/UKHomeOffice) - we'll cover quite a few from the Home Office Registered Traveller Programme (RTP - where libraries are named rtp-library-name).
 
@@ -46,9 +45,6 @@ Well **map** (as mentioned) is "something" that given input, in this case the re
 And **badMap** does just the same as **map**, but as the name suggests, its input is something dodgy!
 
 Well **jsonSchema validate json**, validates the **json** against the **jsonSchema**. Now either validation passes or fails. If it passes, that *good* JSON will be given to **map** to apply its function **processJson**. If the validation fails, the *bad* errors will be given to **badMap** to apply its function **processError**. What this one "DSL" line means, is that functionality is split into reusable, testable, easier to manage and reason about functions.
-
-##### Transform JSON
-Often, you need the ability to **transform** JSON e.g. renaming properties; altering values including changing their types; restructuring the JSON.
 
 This library provides so much more:
 - Transform JSON e.g. renaming properties; altering values including changing their types; restructuring the JSON.
