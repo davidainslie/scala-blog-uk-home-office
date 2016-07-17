@@ -56,8 +56,7 @@
 <p>The following is just a few of our Home Office Registered Traveller open source Scala libraries. Note that all the code can be found in <a href="https://github.com/davidainslie/scala-blog-uk-home-office">Github</a>.</p>
 
 <h2>
-<a id="io-functionality-rtp-io-lib" class="anchor" href="#io-functionality-rtp-io-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>IO functionality (rtp-io-lib)</strong>
-</h2>
+<a id="io-functionality" class="anchor" href="#io-functionality" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>IO functionality</h2>
 
 <p><a href="https://github.com/UKHomeOffice/rtp-io-lib">rtp-io-lib</a> is a general purpose library focused around IO. Many of our projects in the Home Office use JSON to communicate with other systems. Even though JSON is schemaless, a <a href="http://json-schema.org/">JSON Schema</a> can be used, as we do. We use JSON schemas as contracts between systems, and they are used to validate JSON so adding minimal security. By using this approach it is easier to develop and test systems in isolation, knowing that upon integration testing, things should just work! </p>
 
@@ -91,8 +90,7 @@ jsonSchema validate json map processJson badMap processError</pre></div>
 </ul>
 
 <h2>
-<a id="akka-functionality-rtp-akka-lib" class="anchor" href="#akka-functionality-rtp-akka-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Akka functionality (rtp-akka-lib)</strong>
-</h2>
+<a id="akka-functionality" class="anchor" href="#akka-functionality" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Akka functionality</h2>
 
 <p><a href="https://github.com/UKHomeOffice/rtp-akka-lib">rtp-akka-lib</a> provides some extras for working with Akka and Spray (though Spray is being merged into Akka). <a href="http://akka.io/">Akka</a> is too big to describe what it really is, but it's all about distributed, concurrent, fault-tolerant, resilient, but amazingly easy to test systems. <a href="http://spray.io/">Spray</a> is also big, but centres around easily creating RESTful services. At the Home Office we use Spray for microservices.</p>
 
@@ -106,14 +104,39 @@ jsonSchema validate json map processJson badMap processError</pre></div>
 </ul>
 
 <h2>
-<a id="interacting-with-mongodb-the-nosql-database-rtp-mongo-lib" class="anchor" href="#interacting-with-mongodb-the-nosql-database-rtp-mongo-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Interacting with Mongodb the NoSQL database (rtp-mongo-lib)</strong>
-</h2>
+<a id="interacting-with-mongodb-the-nosql-database" class="anchor" href="#interacting-with-mongodb-the-nosql-database" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Interacting with Mongodb the NoSQL database</h2>
 
-<p><a href="https://github.com/UKHomeOffice/rtp-mongo-lib">rtp-mongo-lib</a> to seamlessly work with Mongo drivers - currently Casbah (with or without Salat) and ReactiveMongo.</p>
+<p><a href="https://github.com/UKHomeOffice/rtp-mongo-lib">rtp-mongo-lib</a> to seamlessly work with Mongo drivers - currently Casbah, with or without Salat, and ReactiveMongo.</p>
 
-<p>Casbah is a Scala library that wraps the official Java driver for Mongodb (a library to interact with Mongodb). Salat sits on top of Casbah to provide, well, think of it as the equivalent of an ORM tool i.e. Object to Relational Mapping. Of course Mongodb is not a Relational database, but the idea is the same - the tool abstracts the underlying data structure of the database to a programmer's Object world. Note that Casbah synchronously interacts with the database. Mmmm! Not reactive. However, there is a newer asynchronous driver that has come out to maybe replace Casbah.</p>
+<p>Casbah is a Scala library that wraps the official Java driver for Mongodb (a library to interact with Mongodb). Salat sits on top of Casbah to provide, well, think of it as the equivalent of an ORM tool i.e. Object to Relational Mapping. Of course Mongodb is not a Relational database, but the idea is the same - the tool abstracts the underlying data structure of the database to a programmer's Object world. Note that Casbah synchronously interacts with the database. Mmmm! Not reactive. However, there is a newer asynchronous driver that has come out to probably replace Casbah.</p>
 
 <p>As for Reactivemongo. It is an asynchronous Mongodb driver.</p>
+
+<p>Various functionality is provided in this library to not only make source code easier to write against Mongodb but also very easy when writing your tests e.g. let's save two "test" objects to Mongodb, running as an embedded server in your test, and them read them back to make sure that these "tests" were indeed persisted:</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">Test</span>(<span class="pl-v">data</span>: <span class="pl-k">String</span>)
+
+<span class="pl-k">class</span> <span class="pl-en">RepositorySpec</span> <span class="pl-k">extends</span> <span class="pl-e">Specification</span> <span class="pl-k">with</span> <span class="pl-e">EmbeddedMongoSpecification</span> {
+  <span class="pl-s"><span class="pl-pds">"</span>Repository<span class="pl-pds">"</span></span> should {
+    <span class="pl-s"><span class="pl-pds">"</span>save and find 2 tests<span class="pl-pds">"</span></span> in {
+      <span class="pl-k">val</span> <span class="pl-en">repository</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Repository</span>[<span class="pl-en">Test</span>] <span class="pl-k">with</span> <span class="pl-e">TestMongo</span> {
+        <span class="pl-k">val</span> <span class="pl-en">collectionName</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>tests<span class="pl-pds">"</span></span>
+      }
+
+      <span class="pl-k">val</span> <span class="pl-en">test1</span> <span class="pl-k">=</span> <span class="pl-en">Test</span>(<span class="pl-s"><span class="pl-pds">"</span>1<span class="pl-pds">"</span></span>)
+      repository save test1
+
+      <span class="pl-k">val</span> <span class="pl-en">test2</span> <span class="pl-k">=</span> <span class="pl-en">Test</span>(<span class="pl-s"><span class="pl-pds">"</span>2<span class="pl-pds">"</span></span>)
+      repository save test2
+
+      repository.findAll().toList must beLike {
+        <span class="pl-k">case</span> <span class="pl-en">List</span>(<span class="pl-en">Test</span>(data1), <span class="pl-en">Test</span>(data2)) <span class="pl-k">=&gt;</span>
+          data1 mustEqual test1.data
+          data2 mustEqual test2.data
+      }
+    }
+  }
+}</pre></div>
 
 <p>This library provides:</p>
 
@@ -123,10 +146,38 @@ jsonSchema validate json map processJson badMap processError</pre></div>
 </ul>
 
 <h2>
-<a id="publishsubscribe-to-rabbitmq-messaging-system-rtp-rabbit-lib" class="anchor" href="#publishsubscribe-to-rabbitmq-messaging-system-rtp-rabbit-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Publish/Subscribe to RabbitMQ messaging system (rtp-rabbit-lib)</strong>
-</h2>
+<a id="publishsubscribe-to-rabbitmq-messaging-system" class="anchor" href="#publishsubscribe-to-rabbitmq-messaging-system" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Publish/Subscribe to RabbitMQ messaging system</h2>
 
 <p><a href="https://github.com/UKHomeOffice/rtp-rabbit-lib">rtp-rabbit-lib</a> allows for easy interaction with <a href="https://www.rabbitmq.com/">RabbitMQ</a>, the messaging system written in <a href="https://www.erlang.org/">Erlang</a>. Originally, our RTP frontend and backend systems, were separated by RabbitMQ - frontend public facing systems would publish applications to RabbitMQ queues from which backend systems would subscribe. Note that we decided that the library should only work with JSON (functionality could be added for other data formats).</p>
+
+<p>An example of writing a test:</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">class</span> <span class="pl-en">RabbitSpec</span>(<span class="pl-k">implicit</span> <span class="pl-v">ev</span>: <span class="pl-en">ExecutionEnv</span>) <span class="pl-k">extends</span> <span class="pl-e">Specification</span> <span class="pl-k">with</span> <span class="pl-e">RabbitSpecification</span> {
+  <span class="pl-s"><span class="pl-pds">"</span>Consumer<span class="pl-pds">"</span></span> should {
+    <span class="pl-s"><span class="pl-pds">"</span>consume valid JSON message (for a simple test we do not have a JSON schema to validate against)<span class="pl-pds">"</span></span> in {
+      <span class="pl-c">// Result will be set at some point but don't know when as publish/subscribe is asynchronous.</span>
+      <span class="pl-k">val</span> <span class="pl-en">result</span> <span class="pl-k">=</span> <span class="pl-en">Promise</span>[<span class="pl-en">JValue</span>]()
+
+      <span class="pl-c">// Create a Publisher that is also a Consumer where WithRabbit will connect to a RabbitMQ instance and create/teardown queues.</span>
+      <span class="pl-k">val</span> <span class="pl-en">rabbit</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Publisher</span> <span class="pl-k">with</span> <span class="pl-e">NoJsonValidator</span> <span class="pl-k">with</span> <span class="pl-e">WithQueue.Consumer</span> <span class="pl-k">with</span> <span class="pl-e">WithRabbit</span> {
+        <span class="pl-c">// This method is run, when JSON is consumed from a queue (JSON is automatically validated).</span>
+        <span class="pl-k">def</span> <span class="pl-en">json</span>(<span class="pl-v">json</span>: <span class="pl-en">JValue</span>) <span class="pl-k">=</span> result success json
+      }
+
+      <span class="pl-c">// Publish JSON to RabbitMQ</span>
+      rabbit.publish(<span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
+
+      <span class="pl-c">// At some point in the future, the published JSON will be consumed and here we assert that result.</span>
+      result.future must beLike[<span class="pl-en">JValue</span>] {
+        <span class="pl-k">case</span> j <span class="pl-k">=&gt;</span> j \ <span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> mustEqual <span class="pl-en">JString</span>(<span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
+      }.await
+    }
+  }
+}</pre></div>
+
+<p>Note that unlike most other <strong>rtp</strong> libraries, testing against RabbitMQ requires an actual instance of RabbitMQ running. However, all tests run independently where unique temporary queues are automatically created and torn down.</p>
+
+<p>For this example, an instance of RabbitMQ publisher and consumer (subscriber) is created as the same instance - publisher will publish a message to a <strong>queue</strong> that the consumer listens to. JSON is published as the library was (for us) only required to handle JSON, and so it was easy to automatically validate the JSON via a schema, by using the <strong>rtp-io-lib</strong> already mentioned.</p>
 
 <p>This library provides:</p>
 
@@ -139,34 +190,42 @@ jsonSchema validate json map processJson badMap processError</pre></div>
 <li>Easy testing. Even though a running instance of RabbitMQ is required (we do not have an embedded version as RabbitMQ is written in Erlang) every test creates its own unique, temporary queues - creation and teardown is done for you.</li>
 </ul>
 
-<p>An example of writing a test is (don't worry about the details, just note that we are running a full blown integration test as if it were a simple, concise unit test):</p>
+<h2>
+<a id="publishsubscribe-to-amazon-sqs-messaging-system" class="anchor" href="#publishsubscribe-to-amazon-sqs-messaging-system" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Publish/Subscribe to Amazon SQS messaging system</h2>
 
-<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Consumer<span class="pl-pds">"</span></span> should {
-  <span class="pl-s"><span class="pl-pds">"</span>consume valid JSON message (for a simple test we do not have a JSON schema to validate against)<span class="pl-pds">"</span></span> in {
-    <span class="pl-c">// Result will be set at some point but don't know when as publish/subscribe is asynchronous.</span>
-    <span class="pl-k">val</span> <span class="pl-en">result</span> <span class="pl-k">=</span> <span class="pl-en">Promise</span>[<span class="pl-en">JValue</span>]()
+<p><a href="https://github.com/UKHomeOffice/rtp-amazon-sqs-lib">rtp-amazon-sqs-lib</a> allows for easy integration with Amazon's SQS messaging system, with the help of <a href="https://github.com/adamw/elasticmq">ElasticMQ</a>, an implementation of Amazon SQS. RTP now uses Amazon SQS in favour of RabbitMQ, having moved to AWS. The idea of this library, is much the same as the one discussed above (for RabbitMQ), except that it is a tad more generic, and testing is even easier with an actual embedded Amazon SQS, thanks to ElasticMQ and some custom wrappers.</p>
 
-    <span class="pl-c">// Create a Publisher that is also a Consumer where WithRabbit will connect to a RabbitMQ instance and create/teardown queues.</span>
-    <span class="pl-k">val</span> <span class="pl-en">rabbit</span> <span class="pl-k">=</span> <span class="pl-k">new</span> <span class="pl-en">Publisher</span> <span class="pl-k">with</span> <span class="pl-e">NoJsonValidator</span> <span class="pl-k">with</span> <span class="pl-e">WithQueue.Consumer</span> <span class="pl-k">with</span> <span class="pl-e">WithRabbit</span> {
-      <span class="pl-c">// This method is run, when JSON is consumed from a queue (JSON is automatically validated).</span>
-      <span class="pl-k">def</span> <span class="pl-en">json</span>(<span class="pl-v">json</span>: <span class="pl-en">JValue</span>) <span class="pl-k">=</span> result success json
+<p>The following example shows the use of a bespoke Akka actor to subscribe to a message that is published to a queue on an embedded Amazon SQS instance:</p>
+
+<div class="highlight highlight-source-scala"><pre><span class="pl-k">class</span> <span class="pl-en">AmazonSqsSpec</span>(<span class="pl-k">implicit</span> <span class="pl-v">ev</span>: <span class="pl-en">ExecutionEnv</span>) <span class="pl-k">extends</span> <span class="pl-e">Specification</span> <span class="pl-k">with</span> <span class="pl-e">JsonFormats</span> {
+  <span class="pl-k">trait</span> <span class="pl-en">Context</span> <span class="pl-k">extends</span> <span class="pl-e">ActorSystemContext</span> <span class="pl-k">with</span> <span class="pl-e">ActorExpectations</span> <span class="pl-k">with</span> <span class="pl-e">EmbeddedSQSServer</span> {
+    <span class="pl-k">implicit</span> <span class="pl-k">val</span> <span class="pl-en">listeners</span> <span class="pl-k">=</span> <span class="pl-en">Seq</span>(testActor)
+
+    <span class="pl-k">val</span> <span class="pl-en">queue</span> <span class="pl-k">=</span> create(<span class="pl-k">new</span> <span class="pl-en">Queue</span>(<span class="pl-s"><span class="pl-pds">"</span>test-queue<span class="pl-pds">"</span></span>))
+  }
+
+  <span class="pl-s"><span class="pl-pds">"</span>Subscriber actor<span class="pl-pds">"</span></span> should {
+    <span class="pl-s"><span class="pl-pds">"</span>receive published text, and then fire a message indicating that the text message has been processed<span class="pl-pds">"</span></span> in <span class="pl-k">new</span> <span class="pl-en">Context</span> {
+      system actorOf <span class="pl-en">Props</span> {
+        <span class="pl-k">new</span> <span class="pl-en">SubscriberActor</span>(<span class="pl-k">new</span> <span class="pl-en">Subscriber</span>(queue)) {
+          <span class="pl-k">def</span> <span class="pl-en">receive</span><span class="pl-k">:</span> <span class="pl-en">Receive</span> <span class="pl-k">=</span> {
+            <span class="pl-k">case</span> <span class="pl-v">m</span>: <span class="pl-en">Message</span> <span class="pl-k">=&gt;</span> sender() <span class="pl-k">!</span> <span class="pl-en">Processed</span>(m)
+          }
+        }
+      }
+
+      <span class="pl-k">val</span> <span class="pl-en">message</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>blah<span class="pl-pds">"</span></span>
+
+      <span class="pl-k">new</span> <span class="pl-en">Publisher</span>(queue) publish message
+
+      eventuallyExpectMsg[<span class="pl-en">Processed</span>] {
+        <span class="pl-k">case</span> <span class="pl-en">Processed</span>(m) <span class="pl-k">=&gt;</span> m.content <span class="pl-k">==</span> message
+      }
     }
-
-    <span class="pl-c">// Publish JSON to RabbitMQ</span>
-    rabbit.publish(<span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> <span class="pl-k">-</span><span class="pl-k">&gt;</span> <span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
-
-    <span class="pl-c">// At some point in the future, the published JSON will be consumed and here we assert that result.</span>
-    result.future must beLike[<span class="pl-en">JValue</span>] {
-      <span class="pl-k">case</span> j <span class="pl-k">=&gt;</span> j \ <span class="pl-s"><span class="pl-pds">"</span>json<span class="pl-pds">"</span></span> mustEqual <span class="pl-en">JString</span>(<span class="pl-s"><span class="pl-pds">"</span>ok<span class="pl-pds">"</span></span>)
-    }.await
   }
 }</pre></div>
 
-<h2>
-<a id="publishsubscribe-to-amazon-sqs-messaging-system-rtp-amazon-sqs-lib" class="anchor" href="#publishsubscribe-to-amazon-sqs-messaging-system-rtp-amazon-sqs-lib" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><strong>Publish/Subscribe to Amazon SQS messaging system (rtp-amazon-sqs-lib)</strong>
-</h2>
-
-<p><a href="https://github.com/UKHomeOffice/rtp-amazon-sqs-lib">rtp-amazon-sqs-lib</a> allows for easy integration with Amazon's SQS messaging system, with the help of <a href="https://github.com/adamw/elasticmq">ElasticMQ</a>, an implementation of Amazon SQS. RTP now uses Amazon SQS in favour of RabbitMQ, having moved to AWS. The idea of this library, is much the same as the one discussed above (for RabbitMQ), except that it is a tad more generic, and testing is even easier with an actual embedded Amazon SQS, thanks to ElasticMQ and some custom wrappers.</p>
+<p>The test fixture i.e. the <strong>trait</strong> named <strong>Context</strong>, sets up an embedded Amazon SQS server for each test, along with an Actor System context which is required when dealing with Akka actors. Again we can see just how easy it is to write integration tests as unit tests. A <strong>Publisher</strong> publishes <strong>blah</strong> text to an Amazon SQS <strong>queue</strong>, which will eventually be <strong>Processed</strong> by the <strong>SubscriberActor</strong>.</p>
 
 <p>This library provides:</p>
 
@@ -181,28 +240,6 @@ jsonSchema validate json map processJson badMap processError</pre></div>
 <li>Easy testing. Everything is embedded and tests do not interfere with other.</li>
 <li>Integration tests are written as easily as unit tests and mocking is rarely required, making your tests more viable and code design better.</li>
 </ul>
-
-<p>An example of writing a test is (don't worry about the details, just note that we are running a full blown integration test as if it were a simple, concise unit test), where a message is published to Amazon SQS queue and subscription processes the message:</p>
-
-<div class="highlight highlight-source-scala"><pre><span class="pl-s"><span class="pl-pds">"</span>Subscribing to a text message<span class="pl-pds">"</span></span> should {
-  <span class="pl-s"><span class="pl-pds">"</span>fire a message of <span class="pl-pds">"</span></span><span class="pl-en">Processed</span><span class="pl-s"><span class="pl-pds">"</span>, once processing is complete<span class="pl-pds">"</span></span> in <span class="pl-k">new</span> <span class="pl-en">Context</span> {
-    system actorOf <span class="pl-en">Props</span> {
-      <span class="pl-k">new</span> <span class="pl-en">SubscriberActor</span>(<span class="pl-k">new</span> <span class="pl-en">Subscriber</span>(queue)) {
-        <span class="pl-k">def</span> <span class="pl-en">receive</span><span class="pl-k">:</span> <span class="pl-en">Receive</span> <span class="pl-k">=</span> {
-          <span class="pl-k">case</span> <span class="pl-v">m</span>: <span class="pl-en">Message</span> <span class="pl-k">=&gt;</span> sender() <span class="pl-k">!</span> <span class="pl-en">Processed</span>(m)
-        }
-      }
-    }
-
-    <span class="pl-k">val</span> <span class="pl-en">message</span> <span class="pl-k">=</span> <span class="pl-s"><span class="pl-pds">"</span>blah<span class="pl-pds">"</span></span>
-
-    <span class="pl-k">new</span> <span class="pl-en">Publisher</span>(queue) publish message
-
-    eventuallyExpectMsg[<span class="pl-en">Processed</span>] {
-      <span class="pl-k">case</span> <span class="pl-en">Processed</span>(m) <span class="pl-k">=&gt;</span> m.content <span class="pl-k">==</span> message
-    }
-  }
-}</pre></div>
 
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/davidainslie/scala-blog-uk-home-office">Scala Blog - Scala at UK Home Office</a> is maintained by <a href="https://github.com/davidainslie">davidainslie</a>.</span>
